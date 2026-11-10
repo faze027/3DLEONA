@@ -1,1626 +1,411 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
-    >
-
-    <title> Statue Collection</title>
-
-    <meta
-        name="description"
-        content="An interactive collection of  statue 3D models."
-    >
-
-    <style>
-        :root {
-            color-scheme: light;
-
-            --background: #fff8fb;
-            --background-secondary: #ffeef5;
-
-            --panel: rgba(255, 255, 255, 0.86);
-            --panel-solid: #ffffff;
-            --panel-hover: #fff3f8;
-
-            --pink-light: #ffd8e8;
-            --pink-soft: #ffc5dc;
-            --pink: #f59abb;
-            --pink-dark: #bd537d;
-            --pink-deep: #843655;
-
-            --text: #492c38;
-            --text-soft: #765664;
-            --muted: #a67c8d;
-
-            --border: rgba(189, 83, 125, 0.15);
-            --border-strong: rgba(189, 83, 125, 0.27);
-
-            --danger: #a13e5c;
-            --danger-background: #fff0f4;
-
-            --shadow:
-                0 18px 55px rgba(151, 72, 104, 0.12),
-                0 4px 14px rgba(151, 72, 104, 0.07);
-
-            --shadow-small:
-                0 8px 22px rgba(151, 72, 104, 0.11);
-
-            --radius-large: 22px;
-            --radius-medium: 15px;
-            --radius-small: 11px;
-
-            --control-height: 46px;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        body {
-            font-family:
-                "Segoe UI",
-                Inter,
-                ui-sans-serif,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                sans-serif;
-
-            color: var(--text);
-            background: var(--background);
-        }
-
-        button,
-        select {
-            font: inherit;
-        }
-
-        button,
-        select,
-        a {
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        button:focus-visible,
-        select:focus-visible,
-        a:focus-visible {
-            outline: 3px solid rgba(245, 154, 187, 0.42);
-            outline-offset: 3px;
-        }
-
-        .app {
-            position: relative;
-            width: 100%;
-            height: 100%;
-
-            background:
-                radial-gradient(
-                    circle at 70% 18%,
-                    rgba(255, 205, 226, 0.72),
-                    transparent 31%
-                ),
-                radial-gradient(
-                    circle at 17% 74%,
-                    rgba(255, 225, 237, 0.9),
-                    transparent 32%
-                ),
-                linear-gradient(
-                    145deg,
-                    #fffafd 0%,
-                    #ffeff6 48%,
-                    #fff9fc 100%
-                );
-        }
-
-        .app::before,
-        .app::after {
-            content: "";
-            position: absolute;
-            border-radius: 999px;
-            pointer-events: none;
-            filter: blur(2px);
-        }
-
-        .app::before {
-            top: 12%;
-            right: 9%;
-            width: 180px;
-            height: 180px;
-
-            background: rgba(255, 255, 255, 0.38);
-            box-shadow:
-                0 0 70px rgba(255, 255, 255, 0.7),
-                inset 0 0 35px rgba(255, 205, 226, 0.4);
-        }
-
-        .app::after {
-            bottom: 8%;
-            left: 17%;
-            width: 110px;
-            height: 110px;
-
-            background: rgba(255, 212, 229, 0.22);
-            box-shadow: 0 0 60px rgba(255, 199, 221, 0.4);
-        }
-
-        #viewer {
-            position: absolute;
-            z-index: 1;
-            inset: 0;
-            touch-action: none;
-        }
-
-        #viewer canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            outline: none;
-        }
-
-        .topbar {
-            position: absolute;
-            z-index: 10;
-
-            top: max(20px, env(safe-area-inset-top));
-            left: 20px;
-            right: 20px;
-
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 16px;
-
-            pointer-events: none;
-        }
-
-        .brand,
-        .toolbar,
-        .model-panel,
-        .gesture-help {
-            pointer-events: auto;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            min-height: 50px;
-            padding: 9px 16px 9px 10px;
-
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-
-            box-shadow: var(--shadow-small);
-
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .brand-mark {
-            display: grid;
-            width: 33px;
-            height: 33px;
-            place-items: center;
-
-            color: var(--pink-dark);
-            background:
-                linear-gradient(
-                    145deg,
-                    #ffffff,
-                    var(--pink-light)
-                );
-
-            border: 1px solid var(--border-strong);
-            border-radius: 11px;
-
-            font-size: 17px;
-
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                0 4px 10px rgba(189, 83, 125, 0.1);
-        }
-
-        .brand-copy {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .brand-name {
-            font-size: 14px;
-            font-weight: 720;
-            letter-spacing: 0.01em;
-        }
-
-        .brand-subtitle {
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        .toolbar {
-            display: flex;
-            gap: 7px;
-            padding: 7px;
-
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-
-            box-shadow: var(--shadow-small);
-
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .icon-button {
-            display: inline-flex;
-            width: 38px;
-            height: 38px;
-            align-items: center;
-            justify-content: center;
-
-            padding: 0;
-
-            color: var(--text-soft);
-            background: transparent;
-
-            border: 1px solid transparent;
-            border-radius: 11px;
-
-            cursor: pointer;
-
-            transition:
-                color 150ms ease,
-                background 150ms ease,
-                border-color 150ms ease,
-                transform 150ms ease;
-        }
-
-        .icon-button:hover {
-            color: var(--pink-dark);
-            background: var(--panel-hover);
-            border-color: var(--border);
-            transform: translateY(-1px);
-        }
-
-        .icon-button:active {
-            transform: translateY(0);
-        }
-
-        .icon-button[aria-pressed="true"] {
-            color: var(--pink-deep);
-            background: var(--pink-light);
-            border-color: var(--border-strong);
-        }
-
-        .icon-button svg {
-            width: 18px;
-            height: 18px;
-            pointer-events: none;
-        }
-
-        .model-panel {
-            position: absolute;
-            z-index: 10;
-
-            left: 20px;
-            bottom: max(20px, env(safe-area-inset-bottom));
-
-            width: min(365px, calc(100% - 40px));
-            padding: 20px;
-
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-large);
-
-            box-shadow: var(--shadow);
-
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-        }
-
-        .panel-heading {
-            margin: 0 0 4px;
-            color: var(--text);
-            font-size: 18px;
-            font-weight: 750;
-            letter-spacing: -0.02em;
-        }
-
-        .panel-description {
-            margin: 0 0 18px;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        .field-label {
-            display: block;
-            margin: 0 0 7px;
-
-            color: var(--text-soft);
-
-            font-size: 10px;
-            font-weight: 750;
-            letter-spacing: 0.11em;
-            text-transform: uppercase;
-        }
-
-        .select-wrap {
-            position: relative;
-        }
-
-        .select-wrap::after {
-            content: "";
-            position: absolute;
-
-            top: 50%;
-            right: 16px;
-
-            width: 7px;
-            height: 7px;
-
-            border-right: 1.5px solid var(--pink-dark);
-            border-bottom: 1.5px solid var(--pink-dark);
-
-            pointer-events: none;
-
-            transform:
-                translateY(-70%)
-                rotate(45deg);
-        }
-
-        select {
-            width: 100%;
-            height: var(--control-height);
-
-            padding: 0 42px 0 14px;
-
-            color: var(--text);
-            background: rgba(255, 250, 252, 0.95);
-
-            border: 1px solid var(--border-strong);
-            border-radius: var(--radius-small);
-
-            font-weight: 610;
-
-            appearance: none;
-            cursor: pointer;
-
-            transition:
-                border-color 150ms ease,
-                box-shadow 150ms ease;
-        }
-
-        select:hover {
-            border-color: rgba(189, 83, 125, 0.38);
-        }
-
-        select:focus {
-            border-color: var(--pink);
-            box-shadow: 0 0 0 4px rgba(245, 154, 187, 0.14);
-        }
-
-        .model-meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 11px;
-
-            margin: 16px 0;
-            padding: 0;
-
-            list-style: none;
-        }
-
-        .model-meta li {
-            min-width: 0;
-            padding: 10px 11px;
-
-            background: rgba(255, 247, 251, 0.68);
-            border: 1px solid rgba(189, 83, 125, 0.09);
-            border-radius: 12px;
-        }
-
-        .meta-label {
-            display: block;
-            margin-bottom: 4px;
-
-            color: var(--muted);
-            font-size: 10px;
-            font-weight: 650;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
-
-        .meta-value {
-            display: block;
-            overflow: hidden;
-
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 650;
-
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .download-button {
-            display: flex;
-            width: 100%;
-            height: var(--control-height);
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-
-            padding: 0 18px;
-
-            color: #ffffff;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #e887aa,
-                    #c75f88
-                );
-
-            border: 1px solid rgba(143, 49, 86, 0.15);
-            border-radius: 12px;
-
-            box-shadow:
-                0 9px 20px rgba(189, 83, 125, 0.22),
-                inset 0 1px 0 rgba(255, 255, 255, 0.28);
-
-            font-size: 13px;
-            font-weight: 750;
-            text-decoration: none;
-
-            cursor: pointer;
-
-            transition:
-                transform 150ms ease,
-                box-shadow 150ms ease,
-                filter 150ms ease;
-        }
-
-        .download-button:hover {
-            filter: brightness(1.04);
-
-            transform: translateY(-1px);
-
-            box-shadow:
-                0 12px 25px rgba(189, 83, 125, 0.27),
-                inset 0 1px 0 rgba(255, 255, 255, 0.28);
-        }
-
-        .download-button:active {
-            transform: translateY(0);
-        }
-
-        .download-button svg {
-            width: 17px;
-            height: 17px;
-        }
-
-        .gesture-help {
-            position: absolute;
-            z-index: 10;
-
-            right: 20px;
-            bottom: max(20px, env(safe-area-inset-bottom));
-
-            margin: 0;
-            padding: 10px 14px;
-
-            color: var(--text-soft);
-            background: rgba(255, 255, 255, 0.73);
-
-            border: 1px solid var(--border);
-            border-radius: 13px;
-
-            box-shadow: var(--shadow-small);
-
-            font-size: 11px;
-            line-height: 1.5;
-
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-        }
-
-        .loading {
-            position: absolute;
-            z-index: 20;
-            inset: 0;
-
-            display: grid;
-            place-items: center;
-
-            background: rgba(255, 247, 251, 0.18);
-
-            pointer-events: none;
-
-            transition:
-                opacity 180ms ease,
-                visibility 180ms ease;
-        }
-
-        .loading[hidden] {
-            display: grid;
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        .loading-card {
-            width: min(260px, calc(100% - 40px));
-            padding: 18px;
-
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-
-            box-shadow: var(--shadow);
-
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-
-        .loading-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-
-            margin-bottom: 12px;
-        }
-
-        .loading-label {
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .loading-percent {
-            color: var(--pink-dark);
-            font-size: 12px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .progress-track {
-            width: 100%;
-            height: 5px;
-            overflow: hidden;
-
-            background: var(--pink-light);
-            border-radius: 999px;
-        }
-
-        .progress-bar {
-            width: 0;
-            height: 100%;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    var(--pink-soft),
-                    var(--pink-dark)
-                );
-
-            border-radius: inherit;
-
-            transition: width 120ms linear;
-        }
-
-        .notice {
-            position: absolute;
-            z-index: 30;
-
-            top: 90px;
-            left: 50%;
-
-            width: min(520px, calc(100% - 40px));
-            padding: 13px 16px;
-
-            color: var(--danger);
-            background: rgba(255, 240, 244, 0.96);
-
-            border: 1px solid rgba(161, 62, 92, 0.19);
-            border-radius: 14px;
-
-            box-shadow: var(--shadow-small);
-
-            font-size: 12px;
-            line-height: 1.55;
-            text-align: center;
-
-            transform: translateX(-50%);
-
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-        }
-
-        .notice[hidden] {
-            display: none;
-        }
-
-        @media (max-width: 700px) {
-            .topbar {
-                top: max(12px, env(safe-area-inset-top));
-                left: 12px;
-                right: 12px;
-            }
-
-            .brand {
-                padding-right: 10px;
-            }
-
-            .brand-copy {
-                display: none;
-            }
-
-            .model-panel {
-                left: 12px;
-                bottom: max(12px, env(safe-area-inset-bottom));
-
-                width: calc(100% - 24px);
-                padding: 17px;
-            }
-
-            .panel-heading {
-                font-size: 16px;
-            }
-
-            .panel-description {
-                margin-bottom: 14px;
-            }
-
-            .model-meta {
-                margin: 13px 0;
-            }
-
-            .gesture-help {
-                display: none;
-            }
-
-            .notice {
-                top: 80px;
-                width: calc(100% - 24px);
-            }
-        }
-
-        @media (max-height: 680px) {
-            .panel-description,
-            .model-meta {
-                display: none;
-            }
-
-            .panel-heading {
-                margin-bottom: 12px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                scroll-behavior: auto !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-    </style>
-
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D Leona</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one full-bleed studio stage; a slim caption bar on top, a control dock at the bottom. */
+  :root {
+    --stage: #e8e3db; --stage-2: #d6cfc4; --ink: #1f1c20; --muted: #6a625a;
+    --line: rgba(31, 28, 32, 0.14); --chip: rgba(31, 28, 32, 0.05); --chip-on: #1f1c20; --chip-on-ink: #f3eee6;
+    --accent: #8b6a2e; --shadow: rgba(0, 0, 0, 0.35);
+    --f-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --stage: #1b191d; --stage-2: #0f0e11; --ink: #eee8de; --muted: #a59d92;
+      --line: rgba(238, 232, 222, 0.13); --chip: rgba(238, 232, 222, 0.06); --chip-on: #eee8de; --chip-on-ink: #1b191d;
+      --accent: #cfa968; --shadow: rgba(0, 0, 0, 0.55); color-scheme: dark;
     }
-    </script>
+  }
+  :root[data-theme="dark"] {
+    --stage: #1b191d; --stage-2: #0f0e11; --ink: #eee8de; --muted: #a59d92;
+    --line: rgba(238, 232, 222, 0.13); --chip: rgba(238, 232, 222, 0.06); --chip-on: #eee8de; --chip-on-ink: #1b191d;
+    --accent: #cfa968; --shadow: rgba(0, 0, 0, 0.55); color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  html { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(120% 90% at 50% 38%, var(--stage) 0%, var(--stage-2) 100%);
+    background-color: var(--stage);
+    color: var(--ink); font-family: var(--f-body); overflow: hidden;
+  }
+  .app { position: relative; height: 100%; display: flex; flex-direction: column; }
+  #stage { position: absolute; inset: 0; touch-action: none; }
+  #stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+
+  header.bar {
+    position: relative; z-index: 2; display: flex; gap: 12px 28px; align-items: flex-end; flex-wrap: wrap;
+    padding-block: 18px 10px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    pointer-events: none;
+  }
+  .title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(30px, 4.2vw, 44px); line-height: 1; margin: 0; letter-spacing: 0.005em; text-wrap: balance; }
+  .sub { font-size: 13px; color: var(--muted); }
+  .stats { display: flex; gap: 6px 18px; flex-wrap: wrap; font-family: var(--f-data); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stats b { color: var(--ink); font-weight: 500; }
+  .legend { margin-left: auto; display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: inset 0 0 0 1px var(--line); }
+
+  .dock {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding-block: 10px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; gap: 10px 22px; flex-wrap: wrap; align-items: center; justify-content: center;
+  }
+  .group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .label { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  button.chip {
+    font: 500 13px/1 var(--f-body); color: var(--ink); background: var(--chip);
+    border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; cursor: pointer;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); transition: background .15s, color .15s;
+  }
+  button.chip:hover { border-color: var(--muted); }
+  button.chip[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink); border-color: var(--chip-on); }
+  button.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .loader { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; pointer-events: none; transition: opacity .5s; }
+  .loader .box { display: flex; flex-direction: column; gap: 10px; align-items: center; font-family: var(--f-data); font-size: 12px; color: var(--muted); text-align: center; padding: 0 16px; }
+  .track { width: min(260px, 60vw); height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
+  .fill { height: 100%; width: 0%; background: var(--accent); transition: width .2s; }
+  .loader.done { opacity: 0; }
+  .hint { position: absolute; z-index: 2; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); font-size: 11.5px; color: var(--muted); pointer-events: none; }
+  @media (max-width: 720px) {
+    .legend { display: none; }
+    .hint { display: none; }
+    .dock { gap: 8px 14px; }
+    button.chip { padding: 7px 11px; font-size: 12.5px; }
+    .label { display: none; }
+  }
+  select.chip { appearance: none; font: 500 13px/1 var(--f-body); color: var(--ink); background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; cursor: pointer; }
+  select.chip option { color: #1f1c20; background: #fff; }
+</style>
 </head>
-
 <body>
-    <main class="app">
-        <div
-            id="viewer"
-            role="application"
-            aria-label="Interactive 3D model viewer"
-        ></div>
-
-        <header class="topbar">
-            <div class="brand">
-                <span class="brand-mark" aria-hidden="true">◇</span>
-
-                <span class="brand-copy">
-                    <span class="brand-name"> Statue Collection</span>
-                    <span class="brand-subtitle">Interactive 3D archive</span>
-                </span>
-            </div>
-
-            <nav class="toolbar" aria-label="Viewer controls">
-                <button
-                    class="icon-button"
-                    id="resetButton"
-                    type="button"
-                    title="Reset view"
-                    aria-label="Reset model view"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-                        <path d="M3 4.5v5h5"></path>
-                    </svg>
-                </button>
-
-                <button
-                    class="icon-button"
-                    id="rotateButton"
-                    type="button"
-                    title="Toggle automatic rotation"
-                    aria-label="Toggle automatic rotation"
-                    aria-pressed="false"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M7.5 7.5h-4v-4"></path>
-                        <path d="M3.8 7.3A9 9 0 1 1 3 14"></path>
-                    </svg>
-                </button>
-
-                <button
-                    class="icon-button"
-                    id="fullscreenButton"
-                    type="button"
-                    title="Enter fullscreen"
-                    aria-label="Enter fullscreen"
-                >
-                    <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                    >
-                        <path d="M8 3H3v5"></path>
-                        <path d="M16 3h5v5"></path>
-                        <path d="M8 21H3v-5"></path>
-                        <path d="M16 21h5v-5"></path>
-                    </svg>
-                </button>
-            </nav>
-        </header>
-
-        <section class="model-panel" aria-label="Model selection">
-            <h1 class="panel-heading">Explore the collection</h1>
-
-            <p class="panel-description">
-                Select a model, move around it freely, or download the original file.
-            </p>
-
-            <label class="field-label" for="modelSelect">
-                Current model
-            </label>
-
-            <div class="select-wrap">
-                <select id="modelSelect">
-                    <option value="Statue_Paris_colored.glb">
-                        Statue 1 Colored
-                    </option>
-
-                    <option value="model_fixed.glb">
-                        Model Draft
-                    </option>
-
-                    <option value="model_fixed_colored.glb">
-                        Model Colored
-                    </option>
-
-                    <option value="Statue Draft Paris.stl">
-                        Statue 1 Draft 
-                    </option>
-                </select>
-            </div>
-
-            <ul class="model-meta" aria-label="Model information">
-                <li>
-                    <span class="meta-label">File</span>
-
-                    <span class="meta-value" id="fileName">
-                        Statue_Paris_colored.glb
-                    </span>
-                </li>
-
-                <li>
-                    <span class="meta-label">File size</span>
-
-                    <span class="meta-value" id="fileSize">
-                        Checking...
-                    </span>
-                </li>
-
-                <li>
-                    <span class="meta-label">Meshes</span>
-
-                    <span class="meta-value" id="meshCount">
-                        Loading...
-                    </span>
-                </li>
-
-                <li>
-                    <span class="meta-label">Format</span>
-
-                    <span class="meta-value">
-                        Binary glTF
-                    </span>
-                </li>
-            </ul>
-
-            <a
-                class="download-button"
-                id="downloadButton"
-                href="Statue__colored.glb"
-                download="Statue__colored.glb"
-            >
-                <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.9"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                >
-                    <path d="M12 3v12"></path>
-                    <path d="m7 10 5 5 5-5"></path>
-                    <path d="M5 21h14"></path>
-                </svg>
-
-                Download this model
-            </a>
-        </section>
-
-        <p class="gesture-help">
-            Left-drag to rotate<br>
-            Scroll to zoom<br>
-            Right-drag to move
-        </p>
-
-        <div
-            class="loading"
-            id="loading"
-            role="status"
-            aria-live="polite"
-        >
-            <div class="loading-card">
-                <div class="loading-row">
-                    <span class="loading-label">Loading model</span>
-
-                    <span class="loading-percent" id="loadingPercent">
-                        0%
-                    </span>
-                </div>
-
-                <div class="progress-track">
-                    <div
-                        class="progress-bar"
-                        id="progressBar"
-                    ></div>
-                </div>
-            </div>
-        </div>
-
-        <div
-            class="notice"
-            id="notice"
-            role="alert"
-            aria-live="assertive"
-            hidden
-        ></div>
-    </main>
-
-    <script type="module">
-        import * as THREE from "three";
-
-        import {
-            OrbitControls
-        } from "three/addons/controls/OrbitControls.js";
-
-        import {
-            GLTFLoader
-        } from "three/addons/loaders/GLTFLoader.js";
-
-        const viewer = document.querySelector("#viewer");
-        const modelSelect = document.querySelector("#modelSelect");
-
-        const downloadButton =
-            document.querySelector("#downloadButton");
-
-        const resetButton =
-            document.querySelector("#resetButton");
-
-        const rotateButton =
-            document.querySelector("#rotateButton");
-
-        const fullscreenButton =
-            document.querySelector("#fullscreenButton");
-
-        const loading = document.querySelector("#loading");
-
-        const loadingPercent =
-            document.querySelector("#loadingPercent");
-
-        const progressBar =
-            document.querySelector("#progressBar");
-
-        const notice = document.querySelector("#notice");
-        const fileName = document.querySelector("#fileName");
-        const fileSize = document.querySelector("#fileSize");
-        const meshCount = document.querySelector("#meshCount");
-
-        const scene = new THREE.Scene();
-
-        const camera = new THREE.PerspectiveCamera(
-            45,
-            1,
-            0.01,
-            5000
-        );
-
-        camera.position.set(3, 2.2, 4);
-
-        const renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance"
-        });
-
-        renderer.setPixelRatio(
-            Math.min(window.devicePixelRatio, 2)
-        );
-
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.08;
-
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-        viewer.appendChild(renderer.domElement);
-
-        const controls = new OrbitControls(
-            camera,
-            renderer.domElement
-        );
-
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.07;
-
-        controls.enablePan = true;
-        controls.screenSpacePanning = true;
-
-        controls.minDistance = 0.05;
-        controls.maxDistance = 1000;
-
-        controls.autoRotate = false;
-        controls.autoRotateSpeed = 1.15;
-
-        controls.target.set(0, 0, 0);
-
-        /*
-         * Lighting
-         */
-
-        const hemisphereLight = new THREE.HemisphereLight(
-            0xfff8fb,
-            0xc984a1,
-            2.3
-        );
-
-        scene.add(hemisphereLight);
-
-        const keyLight = new THREE.DirectionalLight(
-            0xffffff,
-            3.5
-        );
-
-        keyLight.position.set(5, 7, 6);
-        keyLight.castShadow = true;
-
-        scene.add(keyLight);
-
-        const fillLight = new THREE.DirectionalLight(
-            0xffc9de,
-            1.8
-        );
-
-        fillLight.position.set(-5, 3, 2);
-
-        scene.add(fillLight);
-
-        const rimLight = new THREE.DirectionalLight(
-            0xffeef5,
-            1.5
-        );
-
-        rimLight.position.set(2, 4, -6);
-
-        scene.add(rimLight);
-
-        /*
-         * Ground grid
-         */
-
-        const grid = new THREE.GridHelper(
-            20,
-            20,
-            0xd893ae,
-            0xf3c6d8
-        );
-
-        grid.material.transparent = true;
-        grid.material.opacity = 0.2;
-        grid.position.y = 0;
-
-        scene.add(grid);
-
-        /*
-         * Model loader
-         */
-
-        const loader = new GLTFLoader();
-
-        let currentModel = null;
-
-        let currentFile =
-            "Statue__colored.glb";
-
-        let activeLoadId = 0;
-        let initialView = null;
-
-        function resizeRenderer() {
-            const width = viewer.clientWidth;
-            const height = viewer.clientHeight;
-
-            if (!width || !height) {
-                return;
-            }
-
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize(
-                width,
-                height,
-                false
-            );
-        }
-
-        const resizeObserver = new ResizeObserver(
-            resizeRenderer
-        );
-
-        resizeObserver.observe(viewer);
-
-        function setLoading(isLoading, progress = 0) {
-            const safeProgress = Math.max(
-                0,
-                Math.min(100, progress)
-            );
-
-            loading.hidden = !isLoading;
-
-            loadingPercent.textContent =
-                `${Math.round(safeProgress)}%`;
-
-            progressBar.style.width =
-                `${safeProgress}%`;
-        }
-
-        function showNotice(message) {
-            notice.textContent = message;
-            notice.hidden = false;
-        }
-
-        function hideNotice() {
-            notice.textContent = "";
-            notice.hidden = true;
-        }
-
-        function formatBytes(bytes) {
-            if (!Number.isFinite(bytes) || bytes <= 0) {
-                return "Unknown";
-            }
-
-            const units = [
-                "B",
-                "KB",
-                "MB",
-                "GB"
-            ];
-
-            const unitIndex = Math.min(
-                Math.floor(
-                    Math.log(bytes) / Math.log(1024)
-                ),
-                units.length - 1
-            );
-
-            const value =
-                bytes / Math.pow(1024, unitIndex);
-
-            const decimals =
-                value >= 10 || unitIndex === 0
-                    ? 0
-                    : 1;
-
-            return (
-                `${value.toFixed(decimals)} ` +
-                units[unitIndex]
-            );
-        }
-
-        function updateDownload(file) {
-            currentFile = file;
-
-            fileName.textContent = file;
-
-            downloadButton.href = encodeURI(file);
-            downloadButton.download = file;
-        }
-
-        async function updateFileSize(file) {
-            fileSize.textContent = "Checking...";
-
-            try {
-                const response = await fetch(
-                    encodeURI(file),
-                    {
-                        method: "HEAD",
-                        cache: "no-store"
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Could not retrieve file size"
-                    );
-                }
-
-                const byteLength = Number(
-                    response.headers.get(
-                        "content-length"
-                    )
-                );
-
-                fileSize.textContent =
-                    formatBytes(byteLength);
-            } catch {
-                fileSize.textContent =
-                    "Available";
-            }
-        }
-
-        function disposeMaterial(material) {
-            if (!material) {
-                return;
-            }
-
-            for (
-                const value of Object.values(material)
-            ) {
-                if (value?.isTexture) {
-                    value.dispose();
-                }
-            }
-
-            material.dispose();
-        }
-
-        function disposeModel(model) {
-            model.traverse((object) => {
-                if (!object.isMesh) {
-                    return;
-                }
-
-                object.geometry?.dispose();
-
-                if (Array.isArray(object.material)) {
-                    object.material.forEach(
-                        disposeMaterial
-                    );
-                } else {
-                    disposeMaterial(object.material);
-                }
-            });
-
-            scene.remove(model);
-        }
-
-        function prepareModel(model) {
-            let numberOfMeshes = 0;
-
-            model.traverse((object) => {
-                if (!object.isMesh) {
-                    return;
-                }
-
-                numberOfMeshes += 1;
-
-                object.castShadow = true;
-                object.receiveShadow = true;
-
-                const materials =
-                    Array.isArray(object.material)
-                        ? object.material
-                        : [object.material];
-
-                materials.forEach((material) => {
-                    if (material?.map) {
-                        material.map.colorSpace =
-                            THREE.SRGBColorSpace;
-                    }
-
-                    if (material) {
-                        material.needsUpdate = true;
-                    }
-                });
-            });
-
-            meshCount.textContent =
-                String(numberOfMeshes);
-        }
-
-        function frameModel(model) {
-            model.updateMatrixWorld(true);
-
-            const startingBox =
-                new THREE.Box3().setFromObject(model);
-
-            if (startingBox.isEmpty()) {
-                throw new Error(
-                    "This model does not contain visible geometry."
-                );
-            }
-
-            const startingCenter =
-                startingBox.getCenter(
-                    new THREE.Vector3()
-                );
-
-            /*
-             * Center the model horizontally.
-             * Place its lowest point on the grid.
-             */
-
-            model.position.x -= startingCenter.x;
-            model.position.z -= startingCenter.z;
-            model.position.y -= startingBox.min.y;
-
-            model.updateMatrixWorld(true);
-
-            const box =
-                new THREE.Box3().setFromObject(model);
-
-            const size =
-                box.getSize(new THREE.Vector3());
-
-            const center =
-                box.getCenter(new THREE.Vector3());
-
-            const maximumDimension = Math.max(
-                size.x,
-                size.y,
-                size.z
-            );
-
-            const verticalFov =
-                THREE.MathUtils.degToRad(
-                    camera.fov
-                );
-
-            let distance =
-                maximumDimension /
-                (2 * Math.tan(verticalFov / 2));
-
-            distance *= 1.55;
-
-            const direction =
-                new THREE.Vector3(
-                    1,
-                    0.68,
-                    1
-                ).normalize();
-
-            camera.near = Math.max(
-                maximumDimension / 1000,
-                0.001
-            );
-
-            camera.far = Math.max(
-                maximumDimension * 100,
-                100
-            );
-
-            camera.updateProjectionMatrix();
-
-            camera.position
-                .copy(center)
-                .add(
-                    direction.multiplyScalar(distance)
-                );
-
-            controls.target.copy(center);
-
-            controls.minDistance = Math.max(
-                maximumDimension * 0.08,
-                0.01
-            );
-
-            controls.maxDistance = Math.max(
-                maximumDimension * 20,
-                10
-            );
-
-            controls.update();
-
-            const gridSize = Math.max(
-                10,
-                Math.ceil(maximumDimension * 4)
-            );
-
-            grid.scale.setScalar(gridSize / 20);
-            grid.position.y = 0;
-
-            initialView = {
-                cameraPosition:
-                    camera.position.clone(),
-
-                target:
-                    controls.target.clone()
-            };
-        }
-
-        function resetView() {
-            if (!initialView) {
-                return;
-            }
-
-            camera.position.copy(
-                initialView.cameraPosition
-            );
-
-            controls.target.copy(
-                initialView.target
-            );
-
-            controls.update();
-        }
-
-        function loadModel(file) {
-            const loadId = ++activeLoadId;
-
-            hideNotice();
-            setLoading(true, 0);
-
-            updateDownload(file);
-            updateFileSize(file);
-
-            meshCount.textContent = "Loading...";
-
-            loader.load(
-                encodeURI(file),
-
-                (gltf) => {
-                    if (loadId !== activeLoadId) {
-                        disposeModel(gltf.scene);
-                        return;
-                    }
-
-                    if (currentModel) {
-                        disposeModel(currentModel);
-                    }
-
-                    currentModel = gltf.scene;
-
-                    try {
-                        prepareModel(currentModel);
-
-                        scene.add(currentModel);
-
-                        frameModel(currentModel);
-
-                        setLoading(false, 100);
-                    } catch (error) {
-                        disposeModel(currentModel);
-
-                        currentModel = null;
-
-                        setLoading(false);
-
-                        showNotice(
-                            error.message ||
-                            `The file "${file}" could not be displayed.`
-                        );
-                    }
-                },
-
-                (event) => {
-                    if (loadId !== activeLoadId) {
-                        return;
-                    }
-
-                    if (
-                        event.lengthComputable &&
-                        event.total > 0
-                    ) {
-                        const progress =
-                            (event.loaded / event.total) *
-                            100;
-
-                        setLoading(true, progress);
-                    } else {
-                        loadingPercent.textContent =
-                            "Loading";
-
-                        progressBar.style.width =
-                            "40%";
-                    }
-                },
-
-                (error) => {
-                    if (loadId !== activeLoadId) {
-                        return;
-                    }
-
-                    console.error(
-                        `Failed to load ${file}:`,
-                        error
-                    );
-
-                    setLoading(false);
-
-                    meshCount.textContent =
-                        "Unavailable";
-
-                    showNotice(
-                        `Could not load "${file}". ` +
-                        `Check that the file is in the same folder as index.html, ` +
-                        `that the capitalization matches exactly, and that it is a valid .glb file.`
-                    );
-                }
-            );
-        }
-
-        modelSelect.addEventListener(
-            "change",
-            (event) => {
-                loadModel(event.target.value);
-            }
-        );
-
-        resetButton.addEventListener(
-            "click",
-            resetView
-        );
-
-        rotateButton.addEventListener(
-            "click",
-            () => {
-                controls.autoRotate =
-                    !controls.autoRotate;
-
-                rotateButton.setAttribute(
-                    "aria-pressed",
-                    String(controls.autoRotate)
-                );
-            }
-        );
-
-        fullscreenButton.addEventListener(
-            "click",
-            async () => {
-                try {
-                    if (!document.fullscreenElement) {
-                        await document.documentElement
-                            .requestFullscreen();
-                    } else {
-                        await document.exitFullscreen();
-                    }
-                } catch {
-                    showNotice(
-                        "Fullscreen is not available in this browser."
-                    );
-                }
-            }
-        );
-
-        document.addEventListener(
-            "fullscreenchange",
-            () => {
-                const isFullscreen =
-                    Boolean(
-                        document.fullscreenElement
-                    );
-
-                const label = isFullscreen
-                    ? "Exit fullscreen"
-                    : "Enter fullscreen";
-
-                fullscreenButton.setAttribute(
-                    "aria-label",
-                    label
-                );
-
-                fullscreenButton.title = label;
-
-                resizeRenderer();
-            }
-        );
-
-        document.addEventListener(
-            "keydown",
-            (event) => {
-                const target = event.target;
-
-                if (
-                    target instanceof HTMLInputElement ||
-                    target instanceof HTMLSelectElement ||
-                    target instanceof HTMLTextAreaElement
-                ) {
-                    return;
-                }
-
-                if (
-                    event.key.toLowerCase() === "r"
-                ) {
-                    resetView();
-                }
-
-                if (event.key === " ") {
-                    event.preventDefault();
-                    rotateButton.click();
-                }
-            }
-        );
-
-        function animate() {
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        renderer.setAnimationLoop(animate);
-
-        resizeRenderer();
-        loadModel(currentFile);
-    </script>
+<div class="app">
+  <div id="stage" aria-label="3D view of the textured model. Drag to orbit, scroll or pinch to zoom."></div>
+  <header class="bar">
+    <div class="title">
+      <h1>Leona</h1>
+      <div class="sub">3D model collection</div>
+    </div>
+    <div class="stats" aria-label="Model facts"><span id="facts">Loading…</span></div>
+  </header>
+
+  <div class="loader" id="loader"><div class="box"><div class="track"><div class="fill" id="fill"></div></div><div id="ltext">Loading model&hellip;</div></div></div>
+  <div class="hint">Drag to orbit &middot; scroll to zoom &middot; right-drag to pan</div>
+
+  <nav class="dock" aria-label="Viewer controls">
+    <div class="group" role="group" aria-label="Model">
+      <span class="label">Model</span>
+      <select class="chip" id="modelSelect" aria-label="Choose a model">
+        <option value="model_colored.glb">Model Colored</option>
+        <option value="model.glb">Model</option>
+        <option value="statue_colored.glb">Statue Colored</option>
+        <option value="statue.glb">Statue</option>
+      </select>
+    </div>
+    <div class="group" role="group" aria-label="View" id="viewGroup">
+      <span class="label">View</span>
+      <button class="chip" data-view="full" aria-pressed="true">Full</button>
+      <button class="chip" data-view="face" aria-pressed="false">Face</button>
+      <button class="chip" data-view="eyes" aria-pressed="false">Eyes</button>
+      <button class="chip" data-view="hair" aria-pressed="false">Hair</button>
+      <button class="chip" data-view="outfit" aria-pressed="false">Outfit</button>
+      <button class="chip" data-view="boots" aria-pressed="false">Boots</button>
+    </div>
+    <div class="group" role="group" aria-label="Lighting">
+      <span class="label">Light</span>
+      <button class="chip" data-light="studio" aria-pressed="true">Studio</button>
+      <button class="chip" data-light="paris" aria-pressed="false">Paris night</button>
+      <button class="chip" data-light="day" aria-pressed="false">Daylight</button>
+    </div>
+    <div class="group" role="group" aria-label="Display">
+      <button class="chip" id="t-rotate" aria-pressed="false">Rotate</button>
+      <button class="chip" id="t-shadow" aria-pressed="true">Shadows</button>
+      <button class="chip" id="t-clay" aria-pressed="false">Bare mesh</button>
+    </div>
+  </nav>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// Textures decode through <img> elements instead of fetch()+createImageBitmap, which a locked-down frame can refuse.
+try { window.createImageBitmap = undefined; } catch (e) { /* keep the default loader */ }
+
+const stage = document.getElementById('stage');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse = window.matchMedia('(pointer: coarse)').matches;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+// glTF frame: Y up, the figure faces +X, her right hand toward +Z, 0.979 units tall, centred on the origin.
+const FLOOR_Y = -0.4897;
+const PENUMBRA = 0.0028;          // ~5 mm soft shadow edge, like a large soft box
+const camera = new THREE.PerspectiveCamera(30, 1, 0.005, 30);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 0.07; controls.maxDistance = 6;
+controls.autoRotateSpeed = 0.8;
+
+// lights: the key light carries the shadow; its shadow box follows the orbit target and tightens as you zoom in
+const key = new THREE.DirectionalLight(0xffffff, 2.5);
+key.castShadow = true;
+const SHADOW_RES = coarse ? 2048 : 4096;
+key.shadow.mapSize.set(SHADOW_RES, SHADOW_RES);
+key.shadow.camera.near = 0.2; key.shadow.camera.far = 9;
+key.shadow.radius = 6; key.shadow.blurSamples = 16;
+const rim = new THREE.DirectionalLight(0xffffff, 1.2);
+const fill = new THREE.DirectionalLight(0xffffff, 0.4);
+const keyTarget = new THREE.Object3D();
+scene.add(keyTarget); key.target = keyTarget; rim.target = keyTarget; fill.target = keyTarget;
+scene.add(key, rim, fill);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.26 }));
+ground.rotation.x = -Math.PI / 2; ground.position.y = FLOOR_Y - 0.0006; ground.receiveShadow = true;
+scene.add(ground);
+
+// directions are [front (+X), up (+Y), her right (+Z)]
+const LIGHTS = {
+  // portrait lighting: key high and ~45 degrees to her left (from her right the long side of the hair shades the face),
+  // a weak fill from her right and a cool rim from behind; the environment stays low so the forms read
+  studio: { exposure: 1.0, env: 0.38, key: [0xfff1e4, 3.0, [0.62, 0.50, -0.60]], rim: [0xe2ebff, 1.6, [-0.5, 0.45, 0.55]], fill: [0xffffff, 0.30, [0.5, 0.1, 0.6]] },
+  paris:  { exposure: 1.05, env: 0.22, key: [0xffae5c, 3.4, [0.62, 0.22, -0.62]], rim: [0x7d9cff, 2.2, [-0.4, 0.5, 0.55]], fill: [0xffd7a1, 0.30, [0.5, 0.05, 0.55]] },
+  day:    { exposure: 1.0, env: 0.85, key: [0xfff9f0, 2.6, [0.5, 0.82, -0.35]], rim: [0xffffff, 0.9, [-0.55, 0.5, 0.4]], fill: [0xdfe9ff, 0.40, [0.5, 0.2, 0.5]] },
+};
+let lightName = 'studio';
+function placeLights() {
+  const p = LIGHTS[lightName], t = controls.target;
+  keyTarget.position.copy(t);
+  for (const [l, d] of [[key, p.key], [rim, p.rim], [fill, p.fill]]) {
+    const v = new THREE.Vector3(...d[2]).normalize().multiplyScalar(4);
+    l.position.copy(t).add(v);
+  }
+  // shadow box: tight around the view for crisp face shadows, wide enough for the whole figure when zoomed out
+  const dist = camera.position.distanceTo(t);
+  const half = THREE.MathUtils.clamp(dist * 0.42, 0.09, 0.66);
+  const sc = key.shadow.camera;
+  if (Math.abs(sc.right - half) > 1e-4) {
+    sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.updateProjectionMatrix();
+    const texel = 2 * half / SHADOW_RES;
+    key.shadow.bias = -0.0004; key.shadow.normalBias = 1.5 * texel;
+    key.shadow.radius = THREE.MathUtils.clamp(PENUMBRA / texel, 2, 24);
+  }
+}
+function setLight(name) {
+  lightName = name;
+  const p = LIGHTS[name];
+  renderer.toneMappingExposure = p.exposure;
+  scene.environmentIntensity = p.env;
+  for (const [l, d] of [[key, p.key], [rim, p.rim], [fill, p.fill]]) { l.color.setHex(d[0]); l.intensity = d[1]; }
+  placeLights();
+  document.querySelectorAll('[data-light]').forEach(b => b.setAttribute('aria-pressed', b.dataset.light === name));
+}
+
+// camera presets (glTF units; the figure looks toward +X)
+const VIEWS = {
+  full:   { pos: [2.05, 0.16, 0.62], tgt: [0, -0.02, 0] },
+  face:   { pos: [0.43, 0.425, 0.13], tgt: [0.06, 0.397, 0.0] },
+  eyes:   { pos: [0.225, 0.418, 0.036], tgt: [0.066, 0.414, -0.001] },
+  hair:   { pos: [-0.56, 0.52, -0.38], tgt: [-0.005, 0.37, 0.0] },
+  outfit: { pos: [1.18, 0.02, 0.70], tgt: [0.0, -0.07, 0.0] },
+  boots:  { pos: [0.72, -0.24, 0.45], tgt: [0.03, -0.39, 0.0] },
+};
+let tween = null;
+function setView(name, instant = false) {
+  const v = VIEWS[name];
+  const p1 = new THREE.Vector3(...v.pos), t1 = new THREE.Vector3(...v.tgt);
+  if (instant || reduceMotion) { camera.position.copy(p1); controls.target.copy(t1); controls.update(); tween = null; placeLights(); }
+  else tween = { p0: camera.position.clone(), t0: controls.target.clone(), p1, t1, t: 0 };
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === name));
+}
+
+// Skin: light wraps a little past the terminator, red furthest, the way it scatters under real skin.
+// Hair: the anisotropy direction map is decoded with a guarded normalize (mip-averaged texels can be ~zero).
+const SKIN = new Set(['Skin_Face_Lips', 'Skin_Hands', 'Eyes_Lashes_Brows']);
+function patchMaterial(mat) {
+  const skin = SKIN.has(mat.name), aniso = !!mat.anisotropyMap;
+  if (!skin && !aniso) return;
+  mat.onBeforeCompile = (shader) => {
+    if (skin) shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_pars_fragment>',
+      THREE.ShaderChunk.lights_physical_pars_fragment.replace(
+        'reflectedLight.directDiffuse += irradiance * BRDF_Lambert( material.diffuseColor );',
+        'float nlW = dot( geometryNormal, directLight.direction );\n' +
+        'vec3 wrapW = vec3( 0.40, 0.17, 0.11 );\n' +
+        'vec3 dlW = saturate( ( vec3( nlW ) + wrapW ) / ( 1.0 + wrapW ) );\n' +
+        'reflectedLight.directDiffuse += dlW * directLight.color * BRDF_Lambert( material.diffuseColor );'));
+    if (aniso) shader.fragmentShader = shader.fragmentShader.replace('#include <lights_physical_fragment>',
+      THREE.ShaderChunk.lights_physical_fragment.replace(
+        'normalize( 2.0 * anisotropyPolar.rg - vec2( 1.0 ) )',
+        '( ( 2.0 * anisotropyPolar.rg - vec2( 1.0 ) ) / max( length( 2.0 * anisotropyPolar.rg - vec2( 1.0 ) ), 1e-3 ) )'));
+  };
+  mat.customProgramCacheKey = () => (skin ? 'skin-wrap' : '') + (aniso ? 'aniso-safe' : '');
+  mat.needsUpdate = true;
+}
+
+let model = null, clay = false;
+const original = new Map();
+const clayMat = new THREE.MeshStandardMaterial({ color: 0xc9c2b8, roughness: 0.72, metalness: 0 });
+function setClay(on) {
+  clay = on;
+  if (model) model.traverse(o => {
+    if (!o.isMesh) return;
+    if (o.userData.isLash) o.visible = !on;          // the 3D lashes are an added object, not part of the uploaded mesh
+    else o.material = on ? clayMat : original.get(o);
+  });
+  document.getElementById('t-clay').setAttribute('aria-pressed', on);
+}
+function setShadows(on) {
+  key.castShadow = on; ground.visible = on;
+  document.getElementById('t-shadow').setAttribute('aria-pressed', on);
+}
+function setRotate(on) {
+  controls.autoRotate = on;
+  document.getElementById('t-rotate').setAttribute('aria-pressed', on);
+}
+
+const fillEl = document.getElementById('fill'), ltext = document.getElementById('ltext');
+const setProgress = (f, text) => { fillEl.style.width = (100 * Math.min(1, f)).toFixed(0) + '%'; ltext.textContent = text; };
+let resolveReady; const ready = new Promise(r => (resolveReady = r));
+
+// Each model is one .glb file next to this page. Whatever its size or orientation, it is turned to face +X,
+// scaled to the same height and centred, so the lights, shadows and camera presets fit every model.
+const MODELS = {
+  'model_colored.glb':  { yaw: 0, closeups: true },
+  'model.glb':          { yaw: 0, closeups: true },
+  'statue_colored.glb': { yaw: Math.PI / 2, closeups: false },
+  'statue.glb':         { yaw: Math.PI / 2, closeups: false },
+};
+const HEIGHT = 0.9793;
+let loadId = 0;
+async function fetchGlb(url, id) {
+  const res = await fetch(encodeURI(url));
+  if (!res.ok) throw new Error(url + ': HTTP ' + res.status);
+  const total = Number(res.headers.get('content-length')) || 0;
+  if (!res.body) return res.arrayBuffer();
+  const reader = res.body.getReader(); const chunks = []; let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value); got += value.length;
+    if (id === loadId) setProgress(total ? 0.95 * got / total : 0.4, `Loading model… ${(got / 1048576).toFixed(0)}${total ? ' of ' + (total / 1048576).toFixed(0) : ''} MB`);
+  }
+  const all = new Uint8Array(got); let o = 0; for (const c of chunks) { all.set(c, o); o += c.length; }
+  return all.buffer;
+}
+function disposeModel(root) {
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    o.geometry.dispose();
+    const m = original.get(o) || o.material;
+    for (const v of Object.values(m)) if (v && v.isTexture) v.dispose();
+    m.dispose();
+  });
+  scene.remove(root);
+}
+async function loadModel(file) {
+  const id = ++loadId, cfg = MODELS[file] || { yaw: 0, closeups: false };
+  const loaderEl = document.getElementById('loader');
+  loaderEl.classList.remove('done'); setProgress(0, 'Loading model…');
+  try {
+    const buf = await fetchGlb(file, id);
+    if (id !== loadId) return;
+    const gltf = await new Promise((resolve, reject) => new GLTFLoader().parse(buf, './', resolve, reject));
+    if (id !== loadId) return;
+    if (model) disposeModel(model);
+    original.clear();
+    const inner = gltf.scene; inner.rotation.y = cfg.yaw; inner.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(inner), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    const k = HEIGHT / size.y;
+    model = new THREE.Group(); model.add(inner);
+    model.scale.setScalar(k); model.position.set(-c.x * k, -c.y * k, -c.z * k);
+    const aniso = renderer.capabilities.getMaxAnisotropy();
+    let tris = 0;
+    model.traverse(o => {
+      if (!o.isMesh) return;
+      tris += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3;
+      o.userData.isLash = !!o.material && o.material.name === 'Eyelashes';
+      o.castShadow = !o.userData.isLash; o.receiveShadow = true; original.set(o, o.material);
+      const m = o.material;
+      for (const key of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'anisotropyMap']) if (m[key]) m[key].anisotropy = aniso;
+      if (!m.userData.patched) { m.userData.patched = true; patchMaterial(m); }
+    });
+    scene.add(model);
+    document.getElementById('facts').innerHTML = `<b>${Math.round(tris).toLocaleString()}</b> triangles · <b>${(buf.byteLength / 1048576).toFixed(0)}</b> MB`;
+    document.querySelectorAll('[data-view]').forEach(b => { b.hidden = !cfg.closeups && b.dataset.view !== 'full'; });
+    setClay(false); setView('full', true);
+    loaderEl.classList.add('done');
+    resolveReady(true);
+  } catch (err) {
+    if (id !== loadId) return;
+    ltext.textContent = `Could not load "${file}". Check that it is in the same folder as index.html and the name matches exactly.`;
+    console.error(err);
+  }
+}
+document.getElementById('modelSelect').addEventListener('change', e => loadModel(e.target.value));
+
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+document.querySelectorAll('[data-light]').forEach(b => b.addEventListener('click', () => setLight(b.dataset.light)));
+document.getElementById('t-clay').addEventListener('click', () => setClay(!clay));
+document.getElementById('t-shadow').addEventListener('click', () => setShadows(!key.castShadow));
+document.getElementById('t-rotate').addEventListener('click', () => setRotate(!controls.autoRotate));
+controls.addEventListener('start', () => { tween = null; });
+controls.addEventListener('change', placeLights);
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.fov = w / h < 0.6 ? 50 : (w / h < 0.9 ? 40 : 30); camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize(); setView('full', true); setLight('studio');
+loadModel(document.getElementById('modelSelect').value);
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (tween) {
+    tween.t = Math.min(1, tween.t + dt / 0.9);
+    const k = tween.t < 0.5 ? 4 * tween.t ** 3 : 1 - (-2 * tween.t + 2) ** 3 / 2;
+    camera.position.lerpVectors(tween.p0, tween.p1, k); controls.target.lerpVectors(tween.t0, tween.t1, k);
+    if (tween.t >= 1) tween = null;
+    placeLights();
+  }
+  controls.update();
+  renderer.render(scene, camera);
+});
+window.viewer = { setView, setLight, setClay, setShadows, setRotate, ready, renderer, scene, camera, controls, placeLights };
+</script>
 </body>
 </html>
